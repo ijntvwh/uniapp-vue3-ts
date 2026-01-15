@@ -1,11 +1,13 @@
+import type { Preset } from 'unocss'
 import { FileSystemIconLoader } from '@iconify/utils/lib/loader/node-loaders'
-import { presetUni } from '@uni-helper/unocss-preset-uni'
+import { presetLegacyCompat } from '@unocss/preset-legacy-compat'
 import { defineConfig, presetIcons, transformerDirectives, transformerVariantGroup } from 'unocss'
+import { presetApplet, presetRemRpx, transformerAttributify } from 'unocss-applet'
 
 export default defineConfig({
   presets: [
-    presetUni({ attributify: { prefixedOnly: true } }),
-    // presetAttributify(),
+    presetApplet(),
+    presetRemRpx(),
     presetIcons({
       warn: true,
       collections: {
@@ -17,18 +19,25 @@ export default defineConfig({
         'vertical-align': 'middle',
       },
     }),
+    // 去除生成的颜色样式中的 in oklch 关键字，现在发现有些渐变色生成不符合预期
+    presetLegacyCompat({ commaStyleColorFunction: true, legacyColorSpace: true }) as Preset,
   ],
   shortcuts: [
     {
-      modal1: 'fixed bottom-0 left-0 right-0 top-0 z100 flex flex-col bg-#fff',
       screen: 'w-screen h-screen',
       'flex-c': 'flex justify-center items-center',
       'flex-ac': 'flex justify-around items-center',
       'flex-bc': 'flex justify-between items-center',
-      abtl: 'absolute top-0 left-0 bottom-0',
+      abtl: 'absolute top-0 left-0',
     },
   ],
-  transformers: [transformerDirectives(), transformerVariantGroup()],
+  transformers: [
+    transformerDirectives(),
+    transformerVariantGroup(),
+    transformerAttributify({
+      prefixedOnly: true,
+    }),
+  ],
   theme: {
     colors: {},
   },

@@ -51,7 +51,9 @@ export default defineConfig(({ mode }) => {
         generateBundle: {
           order: 'post',
           handler(_, bundle) {
-            const entity = Object.entries(bundle).find(([_, v]) => v.fileName === 'app.css' && v.type === 'asset')
+            const entity = Object.entries(bundle).find(
+              ([_, asset]) => asset.fileName === 'app.css' && asset.type === 'asset',
+            )
             if (!entity) return
             entity[1].fileName = 'app.wxss'
           },

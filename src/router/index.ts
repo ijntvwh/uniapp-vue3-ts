@@ -1,4 +1,5 @@
 import type { PageMetaDatum } from '@uni-helper/vite-plugin-uni-pages'
+import { navigateBack, navigateTo, redirectTo, reLaunch, switchTab } from '@uni-helper/uni-promises'
 import { clone } from 'ramda'
 import parseURL from 'url-parse'
 import { pages } from 'virtual:uni-pages'
@@ -7,10 +8,10 @@ import { useAppStore } from '@/store/app'
 export const HOME_PAGE = `/${pages.find(page => page.type === 'home')?.path || pages[0].path}`
 
 const FUNC_TABLE = {
-  to: (opt: UniApp.NavigateToOptions) => uni.navigateTo(opt),
-  redirect: (opt: UniApp.RedirectToOptions) => uni.redirectTo(opt),
-  launch: (opt: UniApp.ReLaunchOptions) => uni.reLaunch(opt),
-  tab: (opt: UniApp.SwitchTabOptions) => uni.switchTab(opt),
+  to: navigateTo,
+  redirect: redirectTo,
+  launch: reLaunch,
+  tab: switchTab,
 } as const
 
 export type NavKey = keyof typeof FUNC_TABLE
@@ -24,8 +25,7 @@ export async function navTo<T extends NavKey>(
   const func = FUNC_TABLE[type]
   let to2
   if (typeof to === 'string') {
-    const url = /^\/?pages\//.test(to) ? to : `/pages/${to.replace(/^\//, '')}`
-    to2 = { url }
+    to2 = { url: /^\/?pages\//.test(to) ? to : `/pages/${to.replace(/^\//, '')}` }
   } else {
     to2 = clone(to)
   }
@@ -47,12 +47,12 @@ export function navBack() {
     if (curPage?.route !== homePath) navTo(`/${homePath}`, 'launch')
     return
   }
-  uni.navigateBack()
+  navigateBack()
 }
 
-const authencated = () => !!useAppStore().$state.accessToken
+const authenticated = () => !!useAppStore().$state.accessToken
 type NavApi = 'navigateTo' | 'reLaunch' | 'redirectTo' | 'switchTab'
-function buildIntercepor(api: NavApi): [NavApi, UniApp.InterceptorOptions] {
+function buildInterceptor(api: NavApi): [NavApi, UniApp.InterceptorOptions] {
   const interceptor: UniApp.InterceptorOptions = {
     invoke: args => {
       // TODO: 登录拦截
@@ -61,7 +61,7 @@ function buildIntercepor(api: NavApi): [NavApi, UniApp.InterceptorOptions] {
       console.log('nav', api, target.pathname, query)
       const page = pages.find(p => target.pathname === `/${p.path}`) as PageMetaDatum
       if (page?.needLogin) {
-        if (!authencated()) {
+        if (!authenticated()) {
           const origin = target.pathname
           const search = Object.keys(query)
             .map(k => `${k}=${query[k]}`)
@@ -78,9 +78,9 @@ function buildIntercepor(api: NavApi): [NavApi, UniApp.InterceptorOptions] {
 }
 export const Router = {
   install() {
-    uni.addInterceptor(...buildIntercepor('navigateTo'))
-    uni.addInterceptor(...buildIntercepor('reLaunch'))
-    uni.addInterceptor(...buildIntercepor('redirectTo'))
-    uni.addInterceptor(...buildIntercepor('switchTab'))
+    uni.addInterceptor(...buildInterceptor('navigateTo'))
+    uni.addInterceptor(...buildInterceptor('reLaunch'))
+    uni.addInterceptor(...buildInterceptor('redirectTo'))
+    uni.addInterceptor(...buildInterceptor('switchTab'))
   },
 }
