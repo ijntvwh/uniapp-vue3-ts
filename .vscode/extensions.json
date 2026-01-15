@@ -5,8 +5,6 @@
     "esbenp.prettier-vscode",
     "dbaeumer.vscode-eslint",
     "mikestead.dotenv",
-    "mhutchie.git-graph",
-    // "vue.vscode-typescript-vue-plugin", recommend take over mode
     "sdras.vue-vscode-snippets",
     "uni-helper.uni-app-snippets-vscode",
     "uni-helper.uni-app-schemas-vscode"

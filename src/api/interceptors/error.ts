@@ -1,6 +1,6 @@
 import type { AjaxResponse } from 'uni-ajax'
-import { hasCustomKey } from '@/api'
 import { useEventStore } from '@/store/event'
+import { hasCustomKey } from '../custom'
 
 export function toastError(err: Error | AjaxResponse) {
   console.log('toast err', err)

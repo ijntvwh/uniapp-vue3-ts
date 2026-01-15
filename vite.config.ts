@@ -1,9 +1,10 @@
+import type { PageContext } from '@uni-helper/vite-plugin-uni-pages'
+import process from 'node:process'
 import Uni from '@uni-helper/plugin-uni'
 import { uniuseAutoImports } from '@uni-helper/uni-use'
 import { VitePluginUniManifest } from '@uni-helper/vite-plugin-uni-manifest'
-import type { PageContext } from '@uni-helper/vite-plugin-uni-pages'
 import UniPages from '@uni-helper/vite-plugin-uni-pages'
-import process from 'node:process'
+import UniKuRoot from '@uni-ku/root'
 import { visualizer } from 'rollup-plugin-visualizer'
 import UnoCSS from 'unocss/vite'
 import autoImport from 'unplugin-auto-import/vite'
@@ -31,6 +32,7 @@ export default defineConfig(({ mode }) => {
           })
         },
       }),
+      UniKuRoot(),
       Uni(),
       UnoCSS(),
       visualizer({ filename: 'generated/stats.html' }),
@@ -44,6 +46,17 @@ export default defineConfig(({ mode }) => {
       }),
       buildTime,
       openDevTools(),
+      {
+        name: 'fixUnocss',
+        generateBundle: {
+          order: 'post',
+          handler(_, bundle) {
+            const entity = Object.entries(bundle).find(([_, v]) => v.fileName === 'app.css' && v.type === 'asset')
+            if (!entity) return
+            entity[1].fileName = 'app.wxss'
+          },
+        },
+      },
     ],
     resolve: {
       alias: { '@': '/src/' },

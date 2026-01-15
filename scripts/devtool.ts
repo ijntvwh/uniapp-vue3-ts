@@ -17,7 +17,7 @@ function _openDevTools() {
 
   console.log(UNI_PLATFORM)
   console.log(`🚀 正在打开${uniPlatformText}开发者工具...`)
-  const command = `/Applications/wechatwebdevtools.app/Contents/MacOS/cli -o "${projectPath}"`
+  const command = `/Applications/wechatwebdevtools.app/Contents/MacOS/cli open --project "${projectPath}"`
 
   exec(command, (error, stdout, stderr) => {
     if (error) {

@@ -1,7 +1,8 @@
 import type { AjaxResponse } from 'uni-ajax'
 import type { BaseResult } from '@/api/interceptors/response'
 import { defineStore } from 'pinia'
-import { hasCustomKey } from '@/api'
+import { hasCustomKey } from '@/api/custom'
+import { isUnAuthorized } from '@/api/interceptors/response'
 import { navTo } from '@/router'
 import { showToast } from '@/utils/uni'
 import { useAppStore } from './app'
@@ -19,8 +20,7 @@ export const useEventStore = defineStore('event', {
       setTimeout(() => showToast(title), 100)
     },
     async navLogin(res: AjaxResponse<BaseResult>) {
-      // TODO: 认证失败判断
-      if (res.data?.code === 401) {
+      if (isUnAuthorized(res?.data)) {
         useAppStore().updateToken()
         if (!hasCustomKey(res, 'anon')) navTo('login')
       }
